@@ -35,6 +35,7 @@ def parse_args():
     parser.add_argument('-o', '--otx-key', help="Alienvault OTX API key", dest='otx_key')
     parser.add_argument('-m', '--misp-key', help="MISP API key", dest='misp_key')
     parser.add_argument('-s', '--misp-server', help="MISP Server address", dest='misp_server')
+    parser.add_argument('-c', '--check_certificate', help="Check MISP certificate", dest='misp_cert')
     return parser.parse_args()
     
 
@@ -62,6 +63,6 @@ if __name__ == '__main__':
     otx = OTXv2(args.otx_key)
     pulses = otx.getall() # Fetch subscribed pulses
 
-    misp = pymisp.PyMISP(args.mis_server, args.misp_key)
+    misp = pymisp.PyMISP(args.misp_server, args.misp_key, ssl=args.misp_cert)
     for pulse in pulses:
         add_event(misp, pulse)

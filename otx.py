@@ -39,7 +39,7 @@ def parse_args():
     return parser.parse_args()
     
 
-def add_event(misp, pulse):
+def add_event(pulse):
     event = MISPEvent()
     event.info = pulse["name"]
     event.add_tag('tlp-white')
@@ -53,8 +53,12 @@ def add_event(misp, pulse):
         for misp_type in otx_types[ioc['type'].lower()]:
             attribute = event.add_attribute(misp_type, ioc['indicator'])
 
-    misp.add_event(event)
+    return event
 
+
+
+def update_event(event, pulse):
+    event.clear()
 
 
 if __name__ == '__main__':
@@ -65,4 +69,13 @@ if __name__ == '__main__':
 
     misp = pymisp.PyMISP(args.misp_server, args.misp_key, ssl=args.misp_cert)
     for pulse in pulses:
-        add_event(misp, pulse)
+        events = misp.search(enventinfo=pulse["name"])
+        if len(events) == 0:
+            misp.add_event(create_event(pulse))
+        else:
+            for event in events:
+                updated_event = update_event(events, pulse)
+                print(updated_event)
+                break
+                misp.update_event(updated_event, event["id"])
+            break

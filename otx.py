@@ -36,7 +36,7 @@ def parse_args():
     return parser.parse_args()
     
 
-def add_event(pulse):
+def create_event(pulse):
     event = MISPEvent()
     event.info = pulse['name']
     event.add_tag('tlp-white')
@@ -54,7 +54,7 @@ def add_event(pulse):
 
 
 def update_event(event, pulse):
-    new_event = add_event(pulse)
+    new_event = create_event(pulse)
     for tag in event['Tag']: # Add user tags
         if tag not in new_event.Tag:
             new_event.add_tag(tag)
@@ -85,10 +85,12 @@ if __name__ == '__main__':
             events = misp.search(eventinfo=pulse['name'])
             if len(events) == 0:
                 misp.add_event(create_event(pulse))
+                added += 1
             else:
                 for event in events:
                     updated_event = update_event(event['Event'], pulse)
                     misp.update_event(updated_event, event['Event']['id'])
+                    updated += 1
     except:
         traceback.print_exc()
     finally:

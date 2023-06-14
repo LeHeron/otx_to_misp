@@ -58,8 +58,24 @@ def add_event(pulse):
 
 
 def update_event(event, pulse):
-    event.clear()
+    id = event.id
+    new_event = add_event(pulse)
+    for tag in event.Tag: # Add user tags
+        if tag not in new_event.Tag:
+            new_event.add_tag(tag)
 
+
+    for ioc in event.Attribute: # Add old / user iocs
+        found = False
+        for pulled_ioc in new_event.Attribute:
+            if ioc.value == pulled_ioc.value:
+                found = True
+                break;
+        if not found:
+            new_event.add_attribute(ioc.type, ioc.value)
+
+
+    misp.update_event(new_event, id)
 
 if __name__ == '__main__':
     args = parse_args()

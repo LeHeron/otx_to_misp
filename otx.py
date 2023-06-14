@@ -26,22 +26,18 @@ otx_types = {
     'filepath': ['filename']
 }
 
-OTX_URL="https://otx.alienvault.com"
-API_ROOT = "/api/v1/"
-SUBSCRIBED_PULSE = "pulses/subscribed"
-
 def parse_args():
     parser = argparse.ArgumentParser(description='Downloads OTX pulses and add them to MISP.')
     parser.add_argument('-o', '--otx-key', help="Alienvault OTX API key", dest='otx_key')
     parser.add_argument('-m', '--misp-key', help="MISP API key", dest='misp_key')
     parser.add_argument('-s', '--misp-server', help="MISP Server address", dest='misp_server')
-    parser.add_argument('-c', '--check_certificate', help="Check MISP certificate", dest='misp_cert')
+    parser.add_argument('-c', '--check_certificate', help="Check MISP certificate", dest='misp_cert', action="store_true")
     return parser.parse_args()
     
 
 def add_event(pulse):
     event = MISPEvent()
-    event.info = pulse["name"]
+    event.info = pulse['name']
     event.add_tag('tlp-white')
     event.add_tag('OTX')
     for tag in pulse['tags']:

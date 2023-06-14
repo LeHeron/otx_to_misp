@@ -67,6 +67,7 @@ def update_event(event, pulse):
                 break;
         if not found:
             new_event.add_attribute(ioc['type'], ioc['value'])
+    return new_event
 
 
 if __name__ == '__main__':
@@ -79,7 +80,7 @@ if __name__ == '__main__':
 
     added = 0
     updated = 0
-    try
+    try:
         for pulse in pulses:
             events = misp.search(eventinfo=pulse['name'])
             if len(events) == 0:
@@ -87,10 +88,7 @@ if __name__ == '__main__':
             else:
                 for event in events:
                     updated_event = update_event(event['Event'], pulse)
-                    print(updated_event)
-                    break
                     misp.update_event(updated_event, event['Event']['id'])
-                break
     except:
         traceback.print_exc()
     finally:

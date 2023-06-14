@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import traceback
 import pymisp
 from pymisp import MISPEvent, MISPObject
 import argparse
@@ -52,26 +53,21 @@ def add_event(pulse):
     return event
 
 
-
 def update_event(event, pulse):
-    id = event.id
     new_event = add_event(pulse)
-    for tag in event.Tag: # Add user tags
+    for tag in event['Tag']: # Add user tags
         if tag not in new_event.Tag:
             new_event.add_tag(tag)
 
-
-    for ioc in event.Attribute: # Add old / user iocs
+    for ioc in event['Attribute']: # Add old / user iocs
         found = False
         for pulled_ioc in new_event.Attribute:
-            if ioc.value == pulled_ioc.value:
+            if ioc['value'] == pulled_ioc.value:
                 found = True
                 break;
         if not found:
-            new_event.add_attribute(ioc.type, ioc.value)
+            new_event.add_attribute(ioc['type'], ioc['value'])
 
-
-    misp.update_event(new_event, id)
 
 if __name__ == '__main__':
     args = parse_args()
@@ -80,14 +76,23 @@ if __name__ == '__main__':
     pulses = otx.getall() # Fetch subscribed pulses
 
     misp = pymisp.PyMISP(args.misp_server, args.misp_key, ssl=args.misp_cert)
-    for pulse in pulses:
-        events = misp.search(enventinfo=pulse["name"])
-        if len(events) == 0:
-            misp.add_event(create_event(pulse))
-        else:
-            for event in events:
-                updated_event = update_event(events, pulse)
-                print(updated_event)
+
+    added = 0
+    updated = 0
+    try
+        for pulse in pulses:
+            events = misp.search(eventinfo=pulse['name'])
+            if len(events) == 0:
+                misp.add_event(create_event(pulse))
+            else:
+                for event in events:
+                    updated_event = update_event(event['Event'], pulse)
+                    print(updated_event)
+                    break
+                    misp.update_event(updated_event, event['Event']['id'])
                 break
-                misp.update_event(updated_event, event["id"])
-            break
+    except:
+        traceback.print_exc()
+    finally:
+        print("Added {} event(s)".format(added))
+        print("Updated {} event(s)".format(updated))

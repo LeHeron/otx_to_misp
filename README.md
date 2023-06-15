@@ -16,9 +16,14 @@ pip3 install -r REQUIREMENTS.txt
 ## Usage
 
 To get help message :  
-`./otx -h`  
-
+```sh
+./otx -h
+```  
 Running on local MISP instance :  
-`./otx -o "<OTX API KEY>" -m <MISP API KEY> -s "https://127.0.0.1"`  
+```sh
+./otx -o "<OTX API KEY>" -m <MISP API KEY> -s "https://127.0.0.1"
+```  
 
 If you are targeting a remote MISP server, add `-c` flag to check SSL certificate.
+
+New events are published by default. To disable it add `-n` flag

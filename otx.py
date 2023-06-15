@@ -32,7 +32,8 @@ def parse_args():
     parser.add_argument('-o', '--otx-key', help="Alienvault OTX API key", dest='otx_key')
     parser.add_argument('-m', '--misp-key', help="MISP API key", dest='misp_key')
     parser.add_argument('-s', '--misp-server', help="MISP Server address", dest='misp_server')
-    parser.add_argument('-c', '--check_certificate', help="Check MISP certificate", dest='misp_cert', action="store_true")
+    parser.add_argument('-c', '--check-certificate', help="Check MISP certificate", dest='misp_cert', action="store_true")
+    parser.add_argument('-n', '--no-publish', help="Do not mark event as published", dest='publish', action="store_false")
     return parser.parse_args()
     
 
@@ -84,11 +85,16 @@ if __name__ == '__main__':
         for pulse in pulses:
             events = misp.search(eventinfo=pulse['name'])
             if len(events) == 0:
-                misp.add_event(create_event(pulse))
+                event = create_event(pulse)
+                if args.publish:
+                    event.publish()
+                misp.add_event(event)
                 added += 1
             else:
                 for event in events:
                     updated_event = update_event(event['Event'], pulse)
+                    if args.publish:
+                        updated_event.publish()
                     misp.update_event(updated_event, event['Event']['id'])
                     updated += 1
     except:

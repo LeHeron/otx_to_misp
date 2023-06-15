@@ -42,7 +42,6 @@ def create_event(pulse, tags):
     event = MISPEvent()
     event.info = pulse['name']
     event.add_tag('tlp-white')
-    event.add_tag('OTX')
     for tag in pulse['tags']:
         event.add_tag(tag)
 

@@ -19,11 +19,13 @@ To get help message :
 ```sh
 ./otx -h
 ```  
-Running on local MISP instance :  
+Example running on local MISP instance :  
 ```sh
-./otx -o "<OTX API KEY>" -m <MISP API KEY> -s "https://127.0.0.1"
+./otx -o "<OTX API KEY>" -m <MISP API KEY> -s "https://127.0.0.1 -t mytag1 -t mytag2"
 ```  
 
-If you are targeting a remote MISP server, add `-c` flag to check SSL certificate.
+Use `-t <tag>` option multiple times to add tags  
+
+If you are targeting a remote MISP server, add `-c` flag to check SSL certificate.  
 
 New events are published by default. To disable it add `-n` flag

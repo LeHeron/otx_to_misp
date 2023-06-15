@@ -34,16 +34,21 @@ def parse_args():
     parser.add_argument('-s', '--misp-server', help="MISP Server address", dest='misp_server')
     parser.add_argument('-c', '--check-certificate', help="Check MISP certificate", dest='misp_cert', action="store_true")
     parser.add_argument('-n', '--no-publish', help="Do not mark event as published", dest='publish', action="store_false")
+    parser.add_argument('-t', '--tag', help="Add tag to event. Can be used multiple time", dest='tags', action="append")
     return parser.parse_args()
     
 
-def create_event(pulse):
+def create_event(pulse, tags):
     event = MISPEvent()
     event.info = pulse['name']
     event.add_tag('tlp-white')
     event.add_tag('OTX')
     for tag in pulse['tags']:
         event.add_tag(tag)
+
+    if tags and len(tags) > 0: # Add cli tags
+        for tag in tags:
+            event.add_tag(tag)
 
     for ioc in pulse['indicators']:
         if not ioc['is_active']:
@@ -54,8 +59,8 @@ def create_event(pulse):
     return event
 
 
-def update_event(event, pulse):
-    new_event = create_event(pulse)
+def update_event(event, pulse, tags):
+    new_event = create_event(pulse, tags)
     for tag in event['Tag']: # Add user tags
         if tag not in new_event.Tag:
             new_event.add_tag(tag)
@@ -85,14 +90,14 @@ if __name__ == '__main__':
         for pulse in pulses:
             events = misp.search(eventinfo=pulse['name'])
             if len(events) == 0:
-                event = create_event(pulse)
+                event = create_event(pulse, args.tags)
                 if args.publish:
                     event.publish()
                 misp.add_event(event)
                 added += 1
             else:
                 for event in events:
-                    updated_event = update_event(event['Event'], pulse)
+                    updated_event = update_event(event['Event'], pulse, args.tags)
                     if args.publish:
                         updated_event.publish()
                     misp.update_event(updated_event, event['Event']['id'])
